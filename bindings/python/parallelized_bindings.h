@@ -69,6 +69,14 @@ void parallelized_bindings(nanobind::module_& m, const std::string& typestr) {
               });
           },
           nb::arg("sets"), nb::arg("points"), nb::arg("tol") = 1e-9, nb::arg("validate") = false);
+
+    // In-place, same matrix for every set.
+    m.def(("batched_linear_transform_" + typestr + "_").c_str(),
+          [](std::vector<SetType*> sets, const Eigen::MatrixXd& matrix) {
+              geosets::parallel_execute_void(
+                  sets, [&](SetType* s, size_t) { s->linear_transform_(matrix); });
+          },
+          nb::arg("sets"), nb::arg("matrix"));
 }
 
 #undef GS_BIND_BATCHED_VOID

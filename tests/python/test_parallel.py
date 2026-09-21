@@ -155,3 +155,14 @@ def test_batched_contains_point(SetType):
         expected = [s.contains_point(points[i], validate=False) for i, s in enumerate(sets)]
         got = list(fn(sets, points, validate=False))
         assert got == expected
+
+
+@pytest.mark.parametrize("SetType", GEOSET_CLASSES)
+def test_batched_linear_transform_(SetType):
+    for dim in get_dim_range(SetType):
+        sets = _make_sets(SetType, dim)
+        matrix = np.random.default_rng(5).normal(size=(dim, dim))
+        expected = [s.linear_transform(matrix) for s in sets]
+        getattr(gsp, f"batched_linear_transform_{_typestr(SetType)}_")(sets, matrix)
+        for s, e in zip(sets, expected):
+            assert np.allclose(s.to_vertices(), e.to_vertices())

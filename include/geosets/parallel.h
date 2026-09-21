@@ -3,6 +3,7 @@
 #include <atomic>
 #include <exception>
 #include <random>
+#include <type_traits>
 #include <vector>
 
 #ifdef GS_USE_OPENMP
@@ -56,7 +57,9 @@ template <typename SetType, typename Func>
 auto parallel_execute(const std::vector<SetType>& sets, Func func)
     -> std::vector<decltype(func(std::declval<SetType>(), size_t{}))> {
     using ResultType = decltype(func(std::declval<SetType>(), size_t{}));
-    std::vector<ResultType> results(sets.size());
+    // std::vector<bool> packs bits, so concurrent writes to neighbouring elements race.
+    using StoredType = std::conditional_t<std::is_same_v<ResultType, bool>, char, ResultType>;
+    std::vector<StoredType> results(sets.size());
     std::vector<std::exception_ptr> errors(sets.size());
 
     OMP_PARALLEL_FOR
@@ -71,7 +74,11 @@ auto parallel_execute(const std::vector<SetType>& sets, Func func)
     for (const auto& error : errors) {
         if (error) std::rethrow_exception(error);
     }
-    return results;
+    if constexpr (std::is_same_v<StoredType, ResultType>) {
+        return results;
+    } else {
+        return std::vector<ResultType>(results.begin(), results.end());
+    }
 }
 
 // Generic parallel execution for functions with void return type

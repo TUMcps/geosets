@@ -56,8 +56,9 @@ def run(p):
             [s.value for s in support(sets, D)]
     elif op == "matMul":
         M = rng.standard_normal((n, n))
+        transform = getattr(gs, f"batched_linear_transform_{p['set']}_")
         for _ in range(reps):
-            [S.linear_transform(M) for S in sets]
+            transform([S.copy() for S in sets], M)  # copy: each rep is M*S of the original S
     elif op == "minkSum":
         others = [rand_set(rng, p) for _ in range(bs)]
         for _ in range(reps):

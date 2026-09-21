@@ -12,5 +12,5 @@ fi
 # ponytail: C++ deps (HiGHS, Eigen, Boost, Qhull) are fetched by CMake; preinstall them to speed up the build
 python3 -m venv .cora-venv
 .cora-venv/bin/pip install --upgrade pip
-.cora-venv/bin/pip install .
+CMAKE_ARGS="-DGS_USE_OPENMP=On" .cora-venv/bin/pip install .
 .cora-venv/bin/python -c "import geosets_py"
