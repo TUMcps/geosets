@@ -1,0 +1,10 @@
+// .zed/debug.json
+    [
+        {
+            "label": "Debug cpp_example",
+            "adapter": "CodeLLDB",
+            "program": "$ZED_WORKTREE_ROOT/build/geosets/examples/cpp/Debug/cpp_example",
+            "request": "launch",
+            "build": "CMake build (geosets)"
+        }
+    ]

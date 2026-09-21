@@ -1,0 +1,17 @@
+set(exe_name "cpp_example")
+add_executable(${exe_name} main.cpp)
+target_compile_features(${exe_name} PRIVATE cxx_std_17)
+target_link_libraries(${exe_name} PRIVATE ${cpp_lib_name})
+
+set(exe_name "cpp_parallel")
+add_executable(${exe_name} parallel.cpp)
+target_compile_features(${exe_name} PRIVATE cxx_std_17)
+target_link_libraries(${exe_name} PRIVATE ${cpp_lib_name})
+if (GS_USE_OPENMP)
+    target_compile_definitions(${exe_name} PRIVATE GS_USE_OPENMP)
+endif ()
+
+set(exe_name "cpp_sampling")
+add_executable(${exe_name} sampling.cpp)
+target_compile_features(${exe_name} PRIVATE cxx_std_17)
+target_link_libraries(${exe_name} PRIVATE ${cpp_lib_name})

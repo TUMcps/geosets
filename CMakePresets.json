@@ -1,0 +1,26 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "geosets",
+            "displayName": "geosets preset",
+            "description": "Configure preset for geosets",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "On",
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": "",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}",
+                "GS_BUILD_CPP_EXAMPLE": "On",
+                "GS_BUILD_TESTS": "On",
+                "GS_BUILD_PYTHON_BINDINGS": "On",
+                "GS_USE_OPENMP": "On",
+                "Python_EXECUTABLE": "${sourceDir}/.venv/bin/python"
+            }
+        }
+    ],
+    "buildPresets": [
+
+    ]
+}

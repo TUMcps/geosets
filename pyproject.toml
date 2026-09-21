@@ -1,0 +1,56 @@
+[project]
+name = "geosets_py"
+version = "0.1.0"
+description = "A template for a C++ project with Python bindings."
+readme = "README.md"
+authors = [
+    { name = "Roland Stolz", email = "roland.stolz@tum.de" },
+]
+requires-python = ">=3.11"
+dependencies = [
+    "matplotlib>=3.10.7",
+    "numpy>=2.3.3",
+]
+
+# [tool.uv]
+# package = true
+
+[build-system]
+requires = [
+    "scikit-build-core>=0.11.6",
+    "nanobind>=2.9.0",
+]
+build-backend = "scikit_build_core.build"
+
+[dependency-groups]
+dev = [
+    "nanobind>=2.9.2",  # For cmake to also find nanobind for good dev experience
+    "pytest>=8.4.2",
+]
+
+[project.optional-dependencies]
+benchmark = [
+    "scipy>=1.16.2",
+    "shapely>=2.1.2",
+]
+
+[tool.scikit-build.cmake.define]
+CMAKE_BUILD_TYPE = { env = "CMAKE_BUILD_TYPE", default = "Release" }
+GS_BUILD_PYTHON_BINDINGS = { env = "GS_BUILD_PYTHON_BINDINGS", default = "ON" }
+GS_BUILD_CPP_EXAMPLE = { env = "GS_BUILD_CPP_EXAMPLES", default = "OFF" }
+GS_BUILD_TESTS = { env = "GS_BUILD_TESTS", default = "OFF" }
+GS_BUILD_DOCUMENTATION = { env = "GS_BUILD_DOCUMENTATION", default = "OFF" }
+GS_USE_OPENMP = { env = "GS_USE_OPENMP", default = "OFF" }
+# Default link the python bindings statically to the geosets library
+BUILD_SHARED_LIBS = { env = "BUILD_SHARED_LIBS", default = "Off" }
+
+# Formatting
+[tool.ruff]
+line-length = 100
+indent-width = 4
+format.quote-style = "double"
+target-version = "py312"
+lint.ignore = ["E203"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402", "F401"]

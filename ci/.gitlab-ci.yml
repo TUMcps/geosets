@@ -1,0 +1,69 @@
+### Setup ###
+
+stages:
+  - static-check
+  - build
+  - test
+  - deploy
+
+variables:
+  GCC_IMAGE: $CI_REGISTRY/cps/geosets/gcc-all-dependencies
+  GCC_IMAGE_NO_DEPS: gcc:latest
+  PYTHON_IMAGE: $CI_REGISTRY/cps/geosets/python-all-dependencies
+  PYTHON_IMAGE_NO_DEPS: python:3.13
+
+before_script:
+  - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+
+include:
+  - local: 'ci/python.gitlab-ci.yml'
+  - local: 'ci/cpp.gitlab-ci.yml'
+
+
+### static-check stage ###
+
+clang-format:
+  image: silkeh/clang:19
+  stage: static-check
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+  script:
+    - clang-format --version
+    - bash ./ci/clang-format.sh
+  allow_failure: true
+
+ruff:
+  image: $PYTHON_IMAGE
+  stage: static-check
+  script:
+    - uvx ruff format --check .
+    - uvx ruff check --output-format=gitlab .
+  allow_failure: true
+
+
+### deploy stage ###
+
+pages:
+  stage: deploy
+  image: $PYTHON_IMAGE
+  script:
+    - apt-get clean && apt-get update && apt-get install -y --no-install-recommends doxygen cmake make && rm -rf /var/lib/apt/lists/*
+    - source .venv/bin/activate
+    - uv pip install sphinx
+    - uv pip install sphinx-rtd-theme
+    - cmake -B build -DGS_BUILD_DOCUMENTATION=ON
+    - cmake --build build --config Release -t doxygen_docs sphinx_docs
+    - mkdir public
+    - mv build/documentation/sphinx/* public
+    - mv build/documentation/doxygen/html public/doxygen
+  artifacts:
+    paths:
+      - public
+  environment:
+    name: Gitlab Pages
+    url: https://cps.pages.gitlab.lrz.de/cps/geosets
+  only:
+    - main
+  needs:
+    - job: build-python
+      artifacts: true

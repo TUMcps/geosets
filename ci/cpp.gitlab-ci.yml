@@ -1,0 +1,82 @@
+### build stage ###
+
+build-compile-commands:
+  image: $GCC_IMAGE
+  stage: build
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+  artifacts:
+    paths:
+      - ./build/compile_commands.json
+
+build-cpp:
+  image: $GCC_IMAGE
+  stage: build
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Release -DGS_BUILD_CPP_EXAMPLE=ON -DGS_BUILD_TESTS=ON
+    - cmake --build build
+  artifacts:
+    paths:
+      - build
+    expire_in: 30 minutes
+
+build-cpp-no-deps:
+  image: $GCC_IMAGE_NO_DEPS
+  stage: build
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends cmake ninja-build git && rm -rf /var/lib/apt/lists/*
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Release -DGS_BUILD_CPP_EXAMPLE=ON -DGS_BUILD_TESTS=ON
+    - cmake --build build
+  artifacts:
+    paths:
+      - build
+    expire_in: 30 minutes
+
+
+### test stage ###
+
+test-cpp:
+  image: $GCC_IMAGE
+  stage: test
+  script:
+    - ctest --test-dir build --output-on-failure
+  needs:
+    - job: build-cpp
+      artifacts: true
+
+test-cpp-no-deps:
+  image: $GCC_IMAGE_NO_DEPS
+  stage: test
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends cmake && rm -rf /var/lib/apt/lists/*
+  script:
+    - ctest --test-dir build --output-on-failure
+  needs:
+    - job: build-cpp-no-deps
+      artifacts: true
+
+coverage-cpp:
+  image: $GCC_IMAGE
+  stage: test
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends gcovr && rm -rf /var/lib/apt/lists/*
+  script:
+    - cmake -B build -DCMAKE_BUILD_TYPE=Debug -DGS_BUILD_TESTS=ON -DGS_BUILD_CODE_COVERAGE=ON
+    - cmake --build build
+    - ctest --test-dir build --output-on-failure
+    - gcovr -r . -e build -e tests --print-summary --exclude-unreachable-branches -x coverage.xml
+    - mkdir -p coverage-report
+    - mv coverage.xml coverage-report/
+  coverage: /^\s*lines:\s*\d+.\d+\%/
+  artifacts:
+    paths:
+      - coverage-report
+    expose_as: 'Coverage Report'
+    expire_in: 30 minutes
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage-report/coverage.xml
+  needs: []

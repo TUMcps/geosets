@@ -1,0 +1,50 @@
+### build stage ###
+
+build-python:
+  image: $PYTHON_IMAGE
+  stage: build
+  script:
+    - uv sync --all-extras
+  artifacts:
+    paths:
+      - .venv
+    expire_in: 2 hours
+
+build-python-no-deps:
+  image: $PYTHON_IMAGE_NO_DEPS
+  stage: build
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends git && rm -rf /var/lib/apt/lists/*
+    - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.lrz.de/".insteadOf "git@gitlab.lrz.de:"
+  script:
+    - python3 -m venv .venv
+    - source .venv/bin/activate
+    - pip install --upgrade pip
+    - pip install .
+  artifacts:
+    paths:
+      - .venv
+    expire_in: 2 hours
+
+
+### test stage ###
+
+test-python:
+  image: $PYTHON_IMAGE
+  stage: test
+  script:
+    - uv run pytest tests/python
+  needs:
+    - job: build-python
+      artifacts: true
+
+test-python-no-deps:
+  image: $PYTHON_IMAGE_NO_DEPS
+  stage: test
+  script:
+    - source .venv/bin/activate
+    - pip install pytest
+    - pytest tests/python
+  needs:
+    - job: build-python-no-deps
+      artifacts: true

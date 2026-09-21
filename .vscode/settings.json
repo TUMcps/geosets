@@ -1,0 +1,13 @@
+{
+    "clangd.arguments": [
+        "--compile-commands-dir=${workspaceFolder}/build/geosets"
+    ],
+    "cmake.useCMakePresets": "always",
+    "chat.tools.terminal.autoApprove": {
+        "./build/geosets/examples/cpp/Debug/cpp_example": true,
+        "./build/tests/cpp/geosets_tests": true,
+        "cmake": true,
+        "./build/examples/cpp/cpp_example": true,
+        "uv": true
+    },
+}

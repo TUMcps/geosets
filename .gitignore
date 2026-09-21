@@ -1,0 +1,26 @@
+# Folder
+.idea
+.idea/*
+public
+
+# Python
+*.pyc
+__pycache__
+.pytest_cache
+
+# C++
+build*/
+cmake-build*/
+
+.coverage
+.idea
+.DS_Store
+uv.lock
+tmp
+
+compile_commands.json
+.cache
+
+src/geosets_py/_gs_py_core/*
+src/geosets_py/py.typed
+.cora-venv

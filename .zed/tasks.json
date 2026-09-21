@@ -1,0 +1,35 @@
+// .zed/tasks.json
+    // This is necessary because of custom presets
+    [
+        {
+            "label": "CMake configure (geosets)",
+            "command": "cmake",
+            "args": [
+                "--preset",
+                "geosets"
+            ],
+            "cwd": "$ZED_WORKTREE_ROOT",
+        },
+        {
+            "label": "CMake build (geosets)",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "build/geosets"
+            ],
+            "cwd": "$ZED_WORKTREE_ROOT",
+        },
+        // Run tasks for specific targets
+        {
+            "label": "Run cpp_example",
+            "command":
+                "cmake --build build/geosets && ./build/geosets/examples/cpp/Debug/cpp_example",
+            "cwd": "$ZED_WORKTREE_ROOT",
+        },
+        {
+            "label": "Run tests",
+            "command":
+                "cmake --build build/geosets && ./build/geosets/tests/cpp/Debug/geosets_tests",
+            "cwd": "$ZED_WORKTREE_ROOT",
+        },
+    ]
